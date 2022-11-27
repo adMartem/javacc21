@@ -63,6 +63,8 @@ public class Token implements ${grammar.constantsClassName} ${extendsNode} {
     private int beginOffset, endOffset;
     
     private boolean unparsed;
+    
+    private LexicalState postLexicalState;
 
 [#if grammar.treeBuildingEnabled]
     private Node parent;
@@ -176,6 +178,18 @@ public class Token implements ${grammar.constantsClassName} ${extendsNode} {
 
     protected void setType(TokenType type) {
         this.type=type;
+    }
+
+    /**
+     * It should be exceedingly rare that an application
+     * programmer needs to use this method.
+     */
+    public void setPostLexicalState(LexicalState postLexicalState) {
+        this.postLexicalState = postLexicalState;
+    }
+    
+    public LexicalState getPostLexicalState() {
+        return postLexicalState;
     }
 
     /**

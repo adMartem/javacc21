@@ -231,7 +231,7 @@ public boolean isCancelled() {return cancelled;}
     for (TokenType tt : types) {
       result |= token_source.activeTokenTypes.add(tt);
     }
-    token_source.reset(getToken(0));
+    token_source.reset(getToken(0), getToken(0).getPostLexicalState());
     nextTokenType = null;
     return result;
   }
@@ -254,7 +254,7 @@ public boolean isCancelled() {return cancelled;}
     for (TokenType tt : types) {
       result |= token_source.activeTokenTypes.remove(tt);
     }
-    token_source.reset(getToken(0));
+    token_source.reset(getToken(0), getToken(0).getPostLexicalState());
     nextTokenType = null;
     return result;
   }

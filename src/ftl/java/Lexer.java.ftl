@@ -394,6 +394,7 @@ public class ${grammar.lexerClassName} implements ${grammar.constantsClassName} 
             matchedToken = ${tokenHookMethodName}(matchedToken);
     [/#if]
  [/#list]
+      matchedToken.setPostLexicalState(this.lexicalState);
       return matchedToken;
    }
 

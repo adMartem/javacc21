@@ -156,7 +156,7 @@
       finally {
          token_source.activeTokenTypes = ${prevActives};
          if (${somethingChanged}) {
-             token_source.reset(${resetToken});
+             token_source.reset(${resetToken}, ${resetToken}.getPostLexicalState());
              nextTokenType= null;
          }
       }
