@@ -54,26 +54,18 @@ public class NfaState {
 
     NfaState(LexicalStateData lexicalState) {
         this.lexicalState = lexicalState;
-        lexicalState.allStates.add(this);
+        lexicalState.addState(this);
     }
 
     public int getIndex() {
         return index;
     }
 
-    public boolean isComposite() {
-        return false;
-    }
-
     public String getMovesArrayName() {
-        return getMethodName().replace("NFA_", "NFA_MOVES_");
-    }
-
-    public String getMethodName() {
         String lexicalStateName = lexicalState.getName();
         if (lexicalStateName.equals("DEFAULT")) 
-            return "NFA_" + index;
-        return "NFA_" + lexicalStateName + "_" + index; 
+            return "NFA_MOVES_" + index;
+        return "NFA_MOVES_" + lexicalStateName + "_" + index; 
     }
 
     public List<Integer> getMoveRanges() { return moveRanges; }
@@ -104,11 +96,6 @@ public class NfaState {
 
     }
 
-    public int getOrdinal() {
-        assert !isComposite();
-        return type == null ? Integer.MAX_VALUE : type.getOrdinal();
-    }
-
     public RegularExpression getType() {return type;}
 
     public LexicalStateData getLexicalState() {return lexicalState;}
@@ -117,22 +104,19 @@ public class NfaState {
 
     public RegularExpression getNextStateType() {return nextState.getType();}
 
-    public int getNextStateIndex() {return nextState.getCanonicalState().getIndex();}
+    public int getNextStateIndex() {
+        return nextState.getCanonicalState().index;
+    }
 
     void setNextState(NfaState nextState) {this.nextState = nextState;}
 
     public Set<NfaState> getEpsilonMoves() {return epsilonMoves;}
 
-    public NfaState getCanonicalState() {
-        if (this.isComposite() || epsilonMoves.isEmpty()) return this;
-        if (epsilonMoves.size() == 1) {
-            return epsilonMoves.iterator().next();
-        }
+    public CompositeStateSet getCanonicalState() {
         return lexicalState.getCanonicalComposite(epsilonMoves);
     }
 
     boolean isMoveCodeNeeded() {
-        if (getCanonicalState().isComposite()) return false;
         if (nextState == null) return false;
         return nextState.type != null || !nextState.epsilonMoves.isEmpty();
     }
@@ -214,6 +198,10 @@ public class NfaState {
         BitSet bs1 = moveRangesToBS(moves1);
         BitSet bs2 = moveRangesToBS(moves2);
         return bs1.intersects(bs2);
+    }
+
+    private int getOrdinal() {
+        return type == null ? Integer.MAX_VALUE : type.getOrdinal();
     }
 
     static int comparator(NfaState state1, NfaState state2) {

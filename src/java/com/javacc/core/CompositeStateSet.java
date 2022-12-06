@@ -30,26 +30,23 @@ package com.javacc.core;
 
 import java.util.*;
 
-public class CompositeStateSet extends NfaState {
-
-    Set<NfaState> states = new HashSet<>(); 
+public class CompositeStateSet {
+    Set<NfaState> states = new HashSet<>();
+    final LexicalStateData lexicalState;
+    int index=-1; 
 
     CompositeStateSet(Set<NfaState> states, LexicalStateData lsd) {
-        super(lsd);
         this.states = new HashSet<>(states);
+        this.lexicalState = lsd;
     }
 
-    public boolean isComposite() {
-        return true;
-    }
-
-    public boolean isMoveCodeNeeded() {
-        return true;
-    }
-
+    public int getIndex() {return index;}
 
     public String getMethodName() {
-        return super.getMethodName().replace("NFA_", "NFA_COMPOSITE_");
+        String lexicalStateName = lexicalState.getName();
+        if (lexicalStateName.equals("DEFAULT")) 
+            return "NFA_" + index;
+        return "NFA_" + lexicalStateName + "_" + index; 
     }
 
     public boolean equals(Object other) {
@@ -68,4 +65,17 @@ public class CompositeStateSet extends NfaState {
         return result;    
     }
 
+    // Recursive method to figure out which composite state sets are actually used.
+    // invoke this on a lexical state's initial state. 
+    void findWhatIsUsed(Set<CompositeStateSet> alreadyVisited, Set<CompositeStateSet> usedStates) {
+        if (alreadyVisited.contains(this)) return;
+        alreadyVisited.add(this);
+        if (states.isEmpty()) return;
+        usedStates.add(this);
+        for (NfaState state : states) {
+            NfaState nextState = state.getNextState();
+            if (nextState == null) continue;
+            nextState.getCanonicalState().findWhatIsUsed(alreadyVisited, usedStates);
+        }
+    }
 }
