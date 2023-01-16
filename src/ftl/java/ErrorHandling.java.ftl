@@ -241,7 +241,7 @@ void dumpLookaheadCallStack(PrintStream ps) {
 // Check whether the very next token is in the follow set of the last consumed token
 // and if it is not, we check one token ahead to see if skipping the next token remedies
 // the problem.
-      if (followSet != null && isParserTolerant()) {
+      if (followSet != null && (isParserTolerant() || tolerant) {
          nextToken = nextToken(lastConsumedToken);
          if (!followSet.contains(nextToken.getType())) {
             Token nextNext = nextToken(nextToken);
@@ -264,7 +264,7 @@ void dumpLookaheadCallStack(PrintStream ps) {
       [#if !grammar.faultTolerant]
        throw new ParseException(this, nextToken, EnumSet.of(expectedType), parsingStack);
       [#else]
-       if (!this.tolerantParsing) {
+       if (!(isParserTolerant() || tolerant)) {
           throw new ParseException(this, nextToken, EnumSet.of(expectedType), parsingStack);
        }
        Token nextNext = nextToken(nextToken);
@@ -280,7 +280,7 @@ void dumpLookaheadCallStack(PrintStream ps) {
              return nextNext;
        }
          [#-- Since skipping the next token did not work, we will insert a virtual token --]
-       if (tolerant || followSet==null || followSet.contains(nextToken.getType())) {
+       if (followSet!=null && followSet.contains(nextToken.getType())) {
            Token virtualToken = Token.newToken(expectedType, token_source, 0,0);
            virtualToken.setImage("VIRTUAL " + expectedType);
            virtualToken.setVirtual(true);
